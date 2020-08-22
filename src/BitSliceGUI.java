@@ -112,7 +112,7 @@ class BitSliceGUI extends JFrame {
             		curPlane = -1;
             		pressed.setBackground(full.getBackground());
             		pressed = full;
-            		prev.setBackground(redc);
+            		pressed.setBackground(redc);
             	}           		
             }
         });
