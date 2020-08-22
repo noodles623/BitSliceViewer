@@ -1,0 +1,60 @@
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.image.BufferedImage;
+import java.awt.Graphics;
+
+import javax.imageio.ImageIO;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+import java.io.ByteArrayInputStream;
+
+
+import java.io.File;
+import java.io.IOException;
+
+class BitSliceGUI extends JFrame {
+	
+	private static final long serialVersionUID = 1L;
+
+	public BitSliceGUI(ByteArrayInputStream bytes) throws IOException {
+		super("Bit Slice");
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		setPreferredSize(new Dimension(960, 720));
+		
+ //       setLayout(new FlowLayout());
+        // set up a file picker component
+//        FilePicker filePicker = new FilePicker("Pick a file", "Browse...");
+ //       filePicker.setMode(FilePicker.MODE_SAVE);
+  //      filePicker.addFileTypeFilter(".jpg", "JPEG Images");
+   //     filePicker.addFileTypeFilter(".png", "PNG Images");
+         
+        // access JFileChooser class directly
+ //       add(filePicker);
+ 
+	final BufferedImage image = ImageIO.read(bytes);
+        JPanel pane = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.drawImage(image, 0, 0, null);
+            }
+        };
+        add(pane);
+		pack();
+		setVisible(true);
+	}
+	
+	public static void main(String[] args) {
+		String dir = "/home/dave/Documents/CS/Personal/Java/HelloWorld/SSAlib/Images/";
+		BitMap bm = new BitMap(dir+"test2.bmp");
+		int[] planeData = BitSlice.sliceBitPlane(bm, 0);
+		ByteArrayInputStream ba = BitSlice.imageInputStream(bm.getBMPHeader(), bm.getDIBHeader(), planeData);
+		try {
+			BitSliceGUI mw = new BitSliceGUI(ba);
+		} catch (IOException e) { e.printStackTrace(); }
+	}
+}
