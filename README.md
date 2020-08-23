@@ -16,4 +16,6 @@ To convert an image to 24bpp bitmap using imagemagick, use the following command
 To open an image, pass it as a command-line argument when running the JAR file:
 > java -jar BitsliceViewer.jar /Path/to/myimage.bmp
 
-***File-picker support coming soon!***
+The image you select MUST be a 24 bit-per-pixel bitmap. The program will not function otherwise.
+
+***Pure Binary Code to Cannonical Grey Code conversion coming soon!***

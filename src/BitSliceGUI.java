@@ -51,10 +51,6 @@ class BitSliceGUI extends JFrame {
 	
 	private ImageIcon loading = new ImageIcon("/Images/loading.gif");
 
-
-
-
-
 	
 	public BitSliceGUI() throws IOException {
 		super("Bit Slice");
