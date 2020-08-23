@@ -37,7 +37,7 @@ class BitSliceGUI extends JFrame {
 	
 	private JLabel viewL;
 	
-	private ByteArrayInputStream[] planes;
+	private ByteArrayInputStream[] planes = new ByteArrayInputStream[24];
 	private ByteArrayInputStream original;
 	
 	private ImageIcon[] planesI = new ImageIcon[24];
@@ -49,8 +49,9 @@ class BitSliceGUI extends JFrame {
 	
 	private JButton[] planesB = new JButton[24];
 
-	public BitSliceGUI(String addr) throws IOException {
+	public BitSliceGUI(String addr, BitSlice bsF, BitSlice[] bsXS) throws IOException {
 		super("Bit Slice");
+
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setPreferredSize(new Dimension(960, 720));
 		
@@ -115,8 +116,8 @@ class BitSliceGUI extends JFrame {
             		pressed.setBackground(redc);
             	}           		
             }
-        });
-		
+        });        
+        
 		viewL.setPreferredSize(new Dimension(500,500));
 		
 		viewC.fill = GridBagConstraints.HORIZONTAL;
@@ -163,16 +164,48 @@ class BitSliceGUI extends JFrame {
         pack();
 		setVisible(true);
 		
-		BitSlice bs = new BitSlice(addr);
-		
-		planes = bs.getPlanes();
-		original = bs.getOriginal();
-		
+		closeOriginal(bsF);
+		closePlanes(bsXS);
+		viewL.setIcon(originalI);
+	}
+	
+	private static BitSlice loadOriginal(String addr) {
+		BitSlice bsF = new BitSlice(addr, -1);
+		bsF.run();
+		return bsF;
+	}
+	
+	private void closeOriginal(BitSlice bsF) throws IOException {
+		try {
+			bsF.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		original = bsF.getBitPlane();
 		originalI = new ImageIcon(scaleImage(ImageIO.read(original)));
+	}
+	
+	private static BitSlice[] loadPlanes(String addr) throws IOException {
+		BitSlice[] bsXS = new BitSlice[24];
+		for(int i = 0; i < 24; i++) {
+			bsXS[i] = new BitSlice(addr, i);
+			bsXS[i].run();
+		}
+		return bsXS;
+	}
+		
+	private void closePlanes(BitSlice[] bsXS) throws IOException {
+		try {
+			for(BitSlice bs : bsXS) 
+				bs.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		for(int i = 0; i < 24; i++)
+			planes[i] = bsXS[i].getBitPlane();
+		
 		for(int i = 0; i < 24; i++)
 			planesI[i] = new ImageIcon(scaleImage(ImageIO.read(planes[i])));
-		
-		viewL.setIcon(originalI);
 	}
 	
 	private BufferedImage scaleImage(BufferedImage img) {
@@ -201,7 +234,9 @@ class BitSliceGUI extends JFrame {
 		String addr = args[0];
 
 		try {
-			BitSliceGUI mw = new BitSliceGUI(addr);
+			BitSlice bsF = loadOriginal(addr);
+			BitSlice[] bsXS = loadPlanes(addr);
+			BitSliceGUI mw = new BitSliceGUI(addr, bsF, bsXS);
 		} catch (IOException e) { e.printStackTrace(); }
 	}
 }

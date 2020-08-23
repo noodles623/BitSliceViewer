@@ -3,30 +3,39 @@ import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-public class BitSlice {
+public class BitSlice extends Thread {
 	
-	private static ByteArrayInputStream[] planes = new ByteArrayInputStream[24];
-	private static ByteArrayInputStream original;
+	private ByteArrayInputStream bitPlane;
+	private String addr;
+	private int plane;
 	
-	public BitSlice(String addr) {
-		BitMap bm = new BitMap(addr);
-		int[] originalPixels = simpleCopy(bm);
-		original = imageInputStream(bm.getBMPHeader(),bm.getDIBHeader(),
-									bm.getHeaderPadding(), originalPixels);
-		for(int i = 0; i < 24; i++) {
-			int[] curPlanePixels = sliceBitPlane(bm, i);
-			planes[i] = imageInputStream(bm.getBMPHeader(),bm.getDIBHeader(),
-										 bm.getHeaderPadding(), curPlanePixels);
-		}		
+	public BitSlice(String addr, int plane) {
+		this.addr = addr;
+		this.plane = plane;
 	}
 	
-	public static int getPlane(int plane) {
+	public void run() {
+		BitMap bm = new BitMap(addr);
+		int[] pixels;
+		if(plane == -1) 
+			pixels = simpleCopy(bm);
+		else
+			pixels = sliceBitPlane(bm, plane);
+		bitPlane = imageInputStream(bm.getBMPHeader(),bm.getDIBHeader(),
+									bm.getHeaderPadding(), pixels);		
+	}
+	
+	private static int getPlane(int plane) {
 		assert (plane >=0 && plane < 24);
 		return 128>>(plane%8);
 	}
 	
+	public ByteArrayInputStream getBitPlane() {
+		return bitPlane;
+	}
+	
 	// Converts specified bit-plane into binary image
-	public static int[] sliceBitPlane(BitMap bm, int plane) {
+	public int[] sliceBitPlane(BitMap bm, int plane) {
 				
 		int[] pixels = bm.getPixels();
 		int[] bitPlane = new int[pixels.length];
@@ -53,7 +62,7 @@ public class BitSlice {
 		return bitPlane;
 	}
 	
-	public static int[] simpleCopy(BitMap bm) {
+	public int[] simpleCopy(BitMap bm) {
 		
 		int[] pixels = bm.getPixels();
 		int[] bitPlane = new int[pixels.length];
@@ -82,15 +91,7 @@ public class BitSlice {
 		return bitPlane;
 	}
 	
-	public ByteArrayInputStream[] getPlanes() {
-		return planes;
-	}
-	
-	public ByteArrayInputStream getOriginal() {
-		return original;
-	}
-	
-	public static void writeBitPlane(BitMap bm, int[] bitPlane, String destination) {
+	public void writeBitPlane(BitMap bm, int[] bitPlane, String destination) {
 		try {
 			FileOutputStream file = new FileOutputStream(destination);
 			BufferedOutputStream bos = new BufferedOutputStream(file);
@@ -114,7 +115,7 @@ public class BitSlice {
 		} catch (IOException e) { e.printStackTrace(); }
 	}
 
-	public static ByteArrayInputStream imageInputStream(int[] bmpHeader, int[] dibHeader, int[] headerPadding, int[] bitPlane) {
+	public ByteArrayInputStream imageInputStream(int[] bmpHeader, int[] dibHeader, int[] headerPadding, int[] bitPlane) {
 		byte[] bytes = new byte[bmpHeader.length+dibHeader.length+headerPadding.length+bitPlane.length];
 		
 		for(int i = 0; i < bmpHeader.length; i++)
