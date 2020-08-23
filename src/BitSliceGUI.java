@@ -48,8 +48,15 @@ class BitSliceGUI extends JFrame {
 	private Color redc = new Color(0xff000);
 	
 	private JButton[] planesB = new JButton[24];
+	
+	private ImageIcon loading = new ImageIcon("/Images/loading.gif");
 
-	public BitSliceGUI(String addr, BitSlice bsF, BitSlice[] bsXS) throws IOException {
+
+
+
+
+	
+	public BitSliceGUI() throws IOException {
 		super("Bit Slice");
 
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -68,7 +75,7 @@ class BitSliceGUI extends JFrame {
 		GridBagConstraints fullC = new GridBagConstraints();
 		GridBagConstraints fileC = new GridBagConstraints();	
 		
-		viewL = new JLabel(new ImageIcon("./Images/loading.gif"));
+		viewL = new JLabel(new ImageIcon());
 
 		JButton next = new JButton("next");
 		JButton prev = new JButton("prev");
@@ -118,6 +125,29 @@ class BitSliceGUI extends JFrame {
             }
         });        
         
+        file.addActionListener(new ActionListener() {
+        	@Override
+        	public void actionPerformed(ActionEvent evt) {
+        		final JFileChooser fc = new JFileChooser();
+        		
+        		File workingDirectory = new File(System.getProperty("user.dir"));
+        		fc.setCurrentDirectory(workingDirectory);
+        		int returnVal = fc.showOpenDialog(file);
+        		if (returnVal == JFileChooser.APPROVE_OPTION) {
+        			try {
+        				File file = fc.getSelectedFile();
+        				viewL.setIcon(loading);
+        				String addr = file.getAbsolutePath();
+        				BitSlice bsF = loadOriginal(addr);
+        				BitSlice[] bsXS = loadPlanes(addr);
+        				closeOriginal(bsF);
+        				closePlanes(bsXS);
+        				viewL.setIcon(originalI);
+        			} catch (IOException e) { e.printStackTrace(); }
+        		}
+        	}
+        });
+        
 		viewL.setPreferredSize(new Dimension(500,500));
 		
 		viewC.fill = GridBagConstraints.HORIZONTAL;
@@ -163,10 +193,6 @@ class BitSliceGUI extends JFrame {
 		
         pack();
 		setVisible(true);
-		
-		closeOriginal(bsF);
-		closePlanes(bsXS);
-		viewL.setIcon(originalI);
 	}
 	
 	private static BitSlice loadOriginal(String addr) {
@@ -231,12 +257,8 @@ class BitSliceGUI extends JFrame {
 	}
 	
 	public static void main(String[] args) {
-		String addr = args[0];
-
 		try {
-			BitSlice bsF = loadOriginal(addr);
-			BitSlice[] bsXS = loadPlanes(addr);
-			BitSliceGUI mw = new BitSliceGUI(addr, bsF, bsXS);
+			BitSliceGUI mw = new BitSliceGUI();
 		} catch (IOException e) { e.printStackTrace(); }
 	}
 }
