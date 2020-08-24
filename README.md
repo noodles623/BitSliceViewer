@@ -4,7 +4,7 @@ A simple gui to display 24 bit image bit-planes in PCB and CGC mode
 ## Screenshots
 ### PCB and CGC comparison
 ![photograph](Screenshots/photoComparison.png)
-### NOTE: Planes 0,8,16 are identical in PCB and CGC modes
+#### NOTE: Planes 0,8,16 are identical in PCB and CGC modes
 ## Download
 Download the latest version from the releases page:
 
@@ -28,7 +28,6 @@ This program sacrifices performance in exchange for a more flexible codebase. Mu
 performance.
 
 ### TODO List
-* Add PBC to CGC display support
 * Loading screen does not display properly
 * Unsafe behavior when pressing buttons as image loads
 * Button highlighting doesn't properly reset when loading new image
