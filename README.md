@@ -1,12 +1,10 @@
 # BitSliceViewer
-A simple gui to display 24 bit image bit-planes
+A simple gui to display 24 bit image bit-planes in PCB and CGC mode
 
 ## Screenshots
-### NOTE: Screenshot UI is outdated, but the overall functionality is accurate.
-### Photograph
-![photograph](Screenshots/photograph.gif)
-### Artwork
-![artwork](Screenshots/artwork.gif)
+### PCB and CGC comparison
+![photograph](Screenshots/photoComparison.png)
+### NOTE: Planes 0,8,16 are identical in PCB and CGC modes
 ## Download
 Download the latest version from the releases page:
 
