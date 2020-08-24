@@ -18,14 +18,11 @@ To convert an image to 24bpp bitmap using imagemagick, use the following command
 
 The image you select MUST be a 24 bit-per-pixel bitmap. The program will not function otherwise.
 
+Pre-converted 24-bit images can be found in the Sample Images folder.
+
 Please do not press buttons while the image is loading.
 
 The image must be releoaded when switching between CGC and PCB encoding.
-
-### Note about efficiency
-The code used to write this program will form the backbone of a full-fledged android steganography applicaiton.
-This program sacrifices performance in exchange for a more flexible codebase. Multi-threading is used to increase
-performance.
 
 ### TODO List
 * Loading screen does not display properly
