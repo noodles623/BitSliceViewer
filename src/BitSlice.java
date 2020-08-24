@@ -14,13 +14,13 @@ public class BitSlice extends Thread {
 		this.plane = plane;
 	}
 	
-	public void run() {
+	public void run(boolean cgc) {
 		BitMap bm = new BitMap(addr);
 		int[] pixels;
 		if(plane == -1) 
-			pixels = simpleCopy(bm);
+			pixels = simpleCopy(bm, cgc);
 		else
-			pixels = sliceBitPlane(bm, plane);
+			pixels = sliceBitPlane(bm, plane, cgc);
 		bitPlane = imageInputStream(bm.getBMPHeader(),bm.getDIBHeader(),
 									bm.getHeaderPadding(), pixels);		
 	}
@@ -35,7 +35,7 @@ public class BitSlice extends Thread {
 	}
 	
 	// Converts specified bit-plane into binary image
-	public int[] sliceBitPlane(BitMap bm, int plane) {
+	public int[] sliceBitPlane(BitMap bm, int plane, boolean cgc) {
 				
 		int[] pixels = bm.getPixels();
 		int[] bitPlane = new int[pixels.length];
@@ -48,9 +48,11 @@ public class BitSlice extends Thread {
 			int offset = row * rowSize;
 			// Process 1 pixel at a time
 			for(int col = 0; col < bm.getImageWidth()*3; col+=3) {
-				//plane 0 is hard-coded - fix this
+				int pixelVal = pixels[offset+col+(plane / 8)];
+				if(cgc==true) pixelVal = toCGC(pixelVal);
+
 				int val = 0xff;
-				if((pixels[offset + col + (plane / 8)] & getPlane(plane)) == 0) 
+				if((pixelVal & getPlane(plane)) == 0) 
 					val = 0x00;
 				for(int k = 0; k < 3; k++)
 					bitPlane[offset+col+k] = val; 
@@ -62,7 +64,7 @@ public class BitSlice extends Thread {
 		return bitPlane;
 	}
 	
-	public int[] simpleCopy(BitMap bm) {
+	public int[] simpleCopy(BitMap bm, boolean cgc) {
 		
 		int[] pixels = bm.getPixels();
 		int[] bitPlane = new int[pixels.length];
@@ -78,7 +80,9 @@ public class BitSlice extends Thread {
 			// Process 1 pixel at a time
 			for(int col = 0; col < bm.getImageWidth()*3; col+=3) {
 				for(int k = 0; k < 3; k++) {
-					bitPlane[offset+col+k] = pixels[offset+col+k]; 
+					int pixelVal = pixels[offset+col+k];
+					if(cgc==true) pixelVal = toCGC(pixelVal);
+					bitPlane[offset+col+k] = pixelVal;
 					totalBytes++;
 				}
 			}
@@ -129,5 +133,9 @@ public class BitSlice extends Thread {
 		
 		ByteArrayInputStream is = new ByteArrayInputStream(bytes);
 		return is;
+	}
+	
+	private int toCGC(int pcb) {
+		return ((pcb<<1)^pcb)>>1;
 	}
 }

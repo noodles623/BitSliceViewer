@@ -14,6 +14,7 @@ import java.awt.GridBagConstraints;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -50,7 +51,8 @@ class BitSliceGUI extends JFrame {
 	private JButton[] planesB = new JButton[24];
 	
 	private ImageIcon loading = new ImageIcon("/Images/loading.gif");
-
+	
+	private boolean cgc = false;
 	
 	public BitSliceGUI() throws IOException {
 		super("Bit Slice");
@@ -70,6 +72,7 @@ class BitSliceGUI extends JFrame {
 		GridBagConstraints prevC = new GridBagConstraints();
 		GridBagConstraints fullC = new GridBagConstraints();
 		GridBagConstraints fileC = new GridBagConstraints();	
+		GridBagConstraints cgcbC = new GridBagConstraints();
 		
 		viewL = new JLabel(new ImageIcon());
 
@@ -78,6 +81,8 @@ class BitSliceGUI extends JFrame {
 		
 		JButton full = new JButton("full");
 		JButton file = new JButton("files");
+		
+		JCheckBox cgcBox = new JCheckBox("CGC Encoding");
 		
 		pressed = full;
 		full.setBackground(redc);
@@ -147,7 +152,7 @@ class BitSliceGUI extends JFrame {
 		viewL.setPreferredSize(new Dimension(500,500));
 		
 		viewC.fill = GridBagConstraints.HORIZONTAL;
-		viewC.gridwidth = 26;
+		viewC.gridwidth = 27;
 
 		prevC.gridy = 1;
 		nextC.gridy = 1;
@@ -157,13 +162,14 @@ class BitSliceGUI extends JFrame {
 		fileC.gridx = 0;
 		fullC.gridx = 1;
 		prevC.gridx = 2;
-		nextC.gridx = 3;		
+		nextC.gridx = 3;	
 		
 		pane.add(file, fileC);
 		pane.add(full, fullC);
 		pane.add(viewL, viewC);
 		pane.add(prev, prevC);
 		pane.add(next, nextC);
+		
 		GridBagConstraints numC = new GridBagConstraints();
 		numC.fill = GridBagConstraints.HORIZONTAL;
 		for(int i = 0; i < 24; i++) {
@@ -186,14 +192,30 @@ class BitSliceGUI extends JFrame {
 	            }
 	        });
 		}
+		cgcbC.gridx = 26;
+		cgcbC.gridy = 1;
+		
+		cgcBox.addActionListener(new ActionListener() {
+			@Override
+		    public void actionPerformed(ActionEvent event) {
+		        JCheckBox cb = (JCheckBox) event.getSource();
+		        if (cb.isSelected()) {
+		        	cgc = true;
+		        } else {
+		        	cgc = false;
+		        }
+		    }
+		});
+		
+		pane.add(cgcBox, cgcbC);
 		
         pack();
 		setVisible(true);
 	}
 	
-	private static BitSlice loadOriginal(String addr) {
+	private BitSlice loadOriginal(String addr) {
 		BitSlice bsF = new BitSlice(addr, -1);
-		bsF.run();
+		bsF.run(cgc);
 		return bsF;
 	}
 	
@@ -207,11 +229,11 @@ class BitSliceGUI extends JFrame {
 		originalI = new ImageIcon(scaleImage(ImageIO.read(original)));
 	}
 	
-	private static BitSlice[] loadPlanes(String addr) throws IOException {
+	private BitSlice[] loadPlanes(String addr) throws IOException {
 		BitSlice[] bsXS = new BitSlice[24];
 		for(int i = 0; i < 24; i++) {
 			bsXS[i] = new BitSlice(addr, i);
-			bsXS[i].run();
+			bsXS[i].run(cgc);
 		}
 		return bsXS;
 	}
