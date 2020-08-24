@@ -7,6 +7,10 @@ A simple gui to display 24 bit image bit-planes
 ![photograph](Screenshots/photograph.gif)
 ### Artwork
 ![artwork](Screenshots/artwork.gif)
+## Download
+Download the latest version from the releases page:
+
+https://github.com/noodles623/BitSliceViewer/releases
 ## Usage
 Requires the latest Java version.
 
