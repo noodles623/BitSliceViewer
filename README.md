@@ -18,4 +18,15 @@ To open an image, pass it as a command-line argument when running the JAR file:
 
 The image you select MUST be a 24 bit-per-pixel bitmap. The program will not function otherwise.
 
-***Pure Binary Code to Cannonical Grey Code conversion coming soon!***
+Please do not press buttons while the image is loading.
+
+### Note about efficiency
+The code used to write this program will form the backbone of a full-fledged android steganography applicaiton.
+This program sacrifices performance in exchange for a more flexible codebase. Multi-threading is used to increase
+performance.
+
+### TODO List
+* Add PBC to CGC display support
+* Loading screen does not display properly
+* Unsafe behavior when pressing buttons as image loads
+* Button highlightin doesn't properly reset when loading new image
