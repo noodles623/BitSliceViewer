@@ -33,4 +33,4 @@ performance.
 * Add PBC to CGC display support
 * Loading screen does not display properly
 * Unsafe behavior when pressing buttons as image loads
-* Button highlightin doesn't properly reset when loading new image
+* Button highlighting doesn't properly reset when loading new image
