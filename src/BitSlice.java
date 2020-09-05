@@ -6,12 +6,23 @@ import java.io.IOException;
 public class BitSlice extends Thread {
 	
 	private ByteArrayInputStream bitPlane;
+	private ByteArrayInputStream[] bitPlanes;
 	private String addr;
 	private int plane;
 	
-	public BitSlice(String addr, int plane) {
+	public BitSlice(String addr, int plane, boolean cgc) {
+		bitPlanes = new ByteArrayInputStream[25];
 		this.addr = addr;
 		this.plane = plane;
+		BitMap bm = new BitMap(addr);
+		int[][] pixels = sliceBitPlanes(bm, cgc);
+		for(int i = 0; i < 25; i++)
+			bitPlanes[i] = imageInputStream(bm.getBMPHeader(), bm.getDIBHeader(),
+											bm.getHeaderPadding(), pixels[i]);
+	}
+	
+	public ByteArrayInputStream[] getBitPlanes() {
+		return bitPlanes;
 	}
 	
 	public void run(boolean cgc) {
@@ -34,7 +45,7 @@ public class BitSlice extends Thread {
 		return bitPlane;
 	}
 	
-	// Converts specified bit-plane into binary image
+	// Converts  bit-plane into binary image
 	public int[] sliceBitPlane(BitMap bm, int plane, boolean cgc) {
 				
 		int[] pixels = bm.getPixels();
@@ -62,6 +73,46 @@ public class BitSlice extends Thread {
 				bitPlane[offset + (bm.getImageWidth()*3) + i] = 0x00;
 		}
 		return bitPlane;
+	}
+	
+	// Converts all bit-planes at once
+	public int[][] sliceBitPlanes(BitMap bm, boolean cgc) {
+				
+		int[] pixels = bm.getPixels();
+		int[][] bitPlanes = new int[25][pixels.length];
+		
+		// https://en.wikipedia.org/wiki/BMP_file_format#Pixel_storage
+		int rowSize = (int) (Math.ceil((24 * bm.getImageWidth()) / 32.0) * 4);
+		int padding = rowSize - bm.getImageWidth() * 3;
+		for(int row = 0; row < bm.getImageHeight(); row++)
+		{
+			int offset = row * rowSize;
+			// Process 1 pixel at a time
+			for(int col = 0; col < bm.getImageWidth()*3; col+=3) {
+				// Original copy
+				for(int k = 0; k < 3; k++) {
+					int pixelVal = pixels[offset+col+k];
+					if(cgc==true) pixelVal = toCGC(pixelVal);
+					bitPlanes[24][offset+col+k] = pixelVal;
+				}
+				for(int plane = 0; plane < 24; plane++) {
+					int pixelVal = pixels[offset+col+(plane / 8)];
+					if(cgc==true) pixelVal = toCGC(pixelVal);
+
+					int val = 0xff;
+					if((pixelVal & getPlane(plane)) == 0) 
+						val = 0x00;
+					for(int k = 0; k < 3; k++)
+						bitPlanes[plane][offset+col+k] = val; 
+				}
+			}
+			// Add padding
+			for(int plane = 0; plane < 25; plane++) {
+				for(int i = 0; i < padding; i++)
+					bitPlanes[plane][offset + (bm.getImageWidth()*3) + i] = 0x00;
+			}
+		}
+		return bitPlanes;
 	}
 	
 	public int[] simpleCopy(BitMap bm, boolean cgc) {
@@ -134,7 +185,7 @@ public class BitSlice extends Thread {
 		ByteArrayInputStream is = new ByteArrayInputStream(bytes);
 		return is;
 	}
-	
+
 	private int toCGC(int pcb) {
 		return ((pcb<<1)^pcb)>>1;
 	}

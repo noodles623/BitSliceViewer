@@ -139,10 +139,17 @@ class BitSliceGUI extends JFrame {
         				File file = fc.getSelectedFile();
         				viewL.setIcon(loading);
         				String addr = file.getAbsolutePath();
-        				BitSlice bsF = loadOriginal(addr);
-        				BitSlice[] bsXS = loadPlanes(addr);
-        				closeOriginal(bsF);
-        				closePlanes(bsXS);
+        				BitSlice bs = new BitSlice(addr,0,cgc);
+        				ByteArrayInputStream[] bas = bs.getBitPlanes();
+        				for(int i = 0; i < 24; i++) {
+        					planesI[i] = new ImageIcon(scaleImage(ImageIO.read(bas[i])));
+        				}
+        				originalI = new ImageIcon(scaleImage(ImageIO.read(bas[24])));
+        				
+//        				BitSlice bsF = loadOriginal(addr);
+//        				BitSlice[] bsXS = loadPlanes(addr);
+//        				closeOriginal(bsF);
+//        				closePlanes(bsXS);
         				viewL.setIcon(originalI);
         			} catch (IOException e) { e.printStackTrace(); }
         		}
@@ -214,7 +221,7 @@ class BitSliceGUI extends JFrame {
 	}
 	
 	private BitSlice loadOriginal(String addr) {
-		BitSlice bsF = new BitSlice(addr, -1);
+		BitSlice bsF = new BitSlice(addr, -1, false);
 		bsF.run(cgc);
 		return bsF;
 	}
@@ -229,10 +236,11 @@ class BitSliceGUI extends JFrame {
 		originalI = new ImageIcon(scaleImage(ImageIO.read(original)));
 	}
 	
+	
 	private BitSlice[] loadPlanes(String addr) throws IOException {
 		BitSlice[] bsXS = new BitSlice[24];
 		for(int i = 0; i < 24; i++) {
-			bsXS[i] = new BitSlice(addr, i);
+			bsXS[i] = new BitSlice(addr, i, false);
 			bsXS[i].run(cgc);
 		}
 		return bsXS;
